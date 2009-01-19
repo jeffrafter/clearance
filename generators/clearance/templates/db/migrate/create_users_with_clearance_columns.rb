@@ -1,12 +1,14 @@
 class CreateOrUpdateUsersWithClearanceColumns < ActiveRecord::Migration
   def self.up
     create_table(:users) do |t|
-      t.string :email
-      t.string :encrypted_password, :limit => 40
-      t.string :salt, :limit => 40
-      t.string :remember_token
+      t.string   :email
+      t.string   :encrypted_password, :limit => 128
+      t.string   :salt,               :limit => 128
+      t.string   :remember_token
       t.datetime :remember_token_expires_at
-      t.boolean :email_confirmed, :default => false, :null => false
+      t.boolean  :email_confirmed, :default => false, :null => false
+      t.boolean  :locked, :default => false, :null => false
+      t.integer  :authentication_failures, :default => 0
     end
 
     add_index :users, [:email, :encrypted_password]

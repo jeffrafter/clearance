@@ -43,6 +43,10 @@ module Clearance
                 user = Factory(:registered_user, :email => "John.Doe@example.com")
                 assert_equal "john.doe@example.com", user.email
               end
+              
+              should "not be locked?" do
+                assert ! Factory(:registered_user).locked?
+              end
             end
             
             context "When multiple users have registerd" do
@@ -92,6 +96,44 @@ module Clearance
               should "not authenticate with bad credentials" do
                 assert ! User.authenticate(@user.email, 'horribly_wrong_password')
                 assert ! @user.authenticated?('horribly_wrong_password')
+              end
+            end
+
+            # authentication frozen
+            
+            context "After 10 failed attempts to sign in, User" do
+              setup do
+                @user = Factory(:email_confirmed_user)
+                10.times do
+                  User.authenticate(@user.email, "horribly_wrong_password")
+                end
+                @user.reload
+              end
+
+              should "be locked" do
+                assert @user.locked?
+              end
+              
+              should "have an authentication failures count of 10" do
+                assert_equal 10, @user.authentication_failures
+              end
+            end
+            
+            context "After 9 failed attempts to sign in" do
+              setup do
+                @user = Factory(:email_confirmed_user)
+                9.times do
+                  User.authenticate(@user.email, "horribly_wrong_password")
+                end
+                @user.reload
+              end
+
+              should "not be locked" do
+                assert ! @user.locked?
+              end
+              
+              should "have an authentication failures count of 9" do
+                assert_equal 9, @user.authentication_failures
               end
             end
 

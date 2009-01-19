@@ -21,15 +21,33 @@ module Clearance
         
             def self.authenticate(email, password)
               user = find(:first, :conditions => ['LOWER(email) = ?', email.to_s.downcase])
-              user && user.authenticated?(password) ? user : nil
+              return nil if user.nil?
+              if user.authenticated?(password)
+                user
+              else
+                user.failed_authentication!
+                nil
+              end
             end
 
             def authenticated?(password)
-              encrypted_password == encrypt(password)
+              encrypted_password == encrypt(password) # && 
+                # email_confirmed? && ! locked?
+            end
+            
+            def failed_authentication!
+              self.increment! :authentication_failures
+              if authentication_failures >= 10
+                self.update_attribute :locked, true
+              end
             end
 
             def encrypt(string)
               Digest::SHA512.hexdigest("--#{salt}--#{string}--")
+            end
+            
+            def confirm_email!
+              self.update_attribute :email_confirmed, true
             end
 
             def remember?
@@ -40,22 +58,16 @@ module Clearance
               remember_me_until 2.weeks.from_now.utc
             end
 
-            def remember_me_until(time)
-              self.update_attribute :remember_token_expires_at, time
-              self.update_attribute :remember_token, 
-                encrypt("--#{remember_token_expires_at}--#{password}--")
-            end
-
             def forget_me!
               self.update_attribute :remember_token_expires_at, nil
               self.update_attribute :remember_token, nil
             end
-
-            def confirm_email!
-              self.update_attribute :email_confirmed, true
-            end
         
             protected
+
+            def password_required?
+              encrypted_password.blank? || !password.blank?
+            end
 
             def initialize_salt
               if new_record?
@@ -67,13 +79,15 @@ module Clearance
               return if password.blank?
               self.encrypted_password = encrypt(password)
             end
-
-            def password_required?
-              encrypted_password.blank? || !password.blank?
-            end
             
             def downcase_email
               self.email = email.to_s.downcase
+            end
+            
+            def remember_me_until(time)
+              self.update_attribute :remember_token_expires_at, time
+              self.update_attribute :remember_token, 
+                encrypt("--#{remember_token_expires_at}--#{password}--")
             end
         
           end

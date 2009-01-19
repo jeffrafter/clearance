@@ -22,6 +22,10 @@ module Clearance
           
         end
       end
+      
+      class ActionController::TestSession
+        attr_accessor :user
+      end
  
     end 
   end

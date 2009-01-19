@@ -6,6 +6,12 @@ class ClearanceGenerator < Rails::Generator::Base
   
   def manifest
     record do |m|
+      
+      m.directory File.join("lib", "extensions")
+      ["lib/extensions/cgi_session.rb"].each do |file|
+        m.file file, file
+      end
+      
       m.directory File.join("app", "controllers")
       file = "app/controllers/application.rb"
       if File.exists?(file)

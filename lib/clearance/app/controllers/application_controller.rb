@@ -10,7 +10,7 @@ module Clearance
             helper_method :signed_in?
         
             def current_user
-              user_from_session || user_from_cookie
+              session.user ||= user_from_session || user_from_cookie
             end
 
             def signed_in?

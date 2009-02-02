@@ -83,8 +83,6 @@ class ClearanceGenerator < Rails::Generator::Base
           'db/migrate', :migration_file_name => 'create_or_update_users_with_clearance_columns'
       end
             
-      m.rake_db_migrate
-      
       m.readme "README"
     end
   end

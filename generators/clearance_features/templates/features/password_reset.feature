@@ -1,4 +1,4 @@
-Fature: Password Reset
+Feature: Password Reset
   In order to sign in even if he forgot his password
   A user
   Should be able to reset it

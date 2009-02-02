@@ -1,52 +1,54 @@
 require 'rake'
 require 'rake/testtask'
 require 'cucumber/rake/task'
+require 'active_record'
  
-test_files_pattern = 'test/rails_root/test/{unit,functional,other}/**/*_test.rb'
+test_files_pattern = 'test/rails_root/test/{unit,functional}/**/*_test.rb'
 
-namespace :test do
-  Rake::TestTask.new(:all => ['generator:cleanup', 'generator:generate']) do |task|
-    task.libs << 'lib'
-    task.pattern = test_files_pattern
-    task.verbose = false
-  end
-  
-  Cucumber::Rake::Task.new(:features) do |t|
-    t.cucumber_opts = "--format progress"
-    t.feature_pattern = 'test/rails_root/features/*.feature'
-  end  
+Rake::TestTask.new(:test => ['cleanup', 'generate', 'migrate']) do |task|
+  task.libs << 'lib'
+  task.pattern = test_files_pattern
+  task.verbose = false
+end
+
+Cucumber::Rake::Task.new(:features => ['cleanup', 'generate', 'migrate']) do |t|
+  t.cucumber_opts = "--format pretty"
+  t.feature_pattern = 'test/rails_root/features/*.feature'
+end  
+
+desc "Run the test suite and features"
+task :default => ['test', 'features']
+
+desc "Run the migrations inside the Rails root"
+task :migrate do
+  system "cd test/rails_root && rake db:migrate db:schema:dump db:test:prepare"
 end
 
 generators = %w(clearance clearance_features)
 
-namespace :generator do
-  desc "Cleans up the test app before running the generator"
-  task :cleanup do
-    generators.each do |generator|
-      FileList["generators/#{generator}/templates/**/*.*"].each do |each|
-        file = "test/rails_root/#{each.gsub("generators/#{generator}/templates/",'')}"
-        File.delete(file) if File.exists?(file)
-      end    
-    end
-    
-    FileList["test/rails_root/db/**/*"].each do |each| 
-      FileUtils.rm_rf(each)
-    end
-    FileUtils.rm_rf("test/rails_root/vendor/plugins/clearance")
-    system "mkdir -p test/rails_root/vendor/plugins/clearance"
-    system "cp -R generators test/rails_root/vendor/plugins/clearance"  
+desc "Cleans up the test app before running the generator"
+task :cleanup do
+  generators.each do |generator|
+    FileList["generators/#{generator}/templates/**/*.*"].each do |each|
+      file = "test/rails_root/#{each.gsub("generators/#{generator}/templates/",'')}"
+      File.delete(file) if File.exists?(file)
+    end    
   end
   
-  desc "Run the generator on the tests"
-  task :generate do
-    generators.each do |generator|
-      system "cd test/rails_root && ./script/generate #{generator}"
-    end
+  FileList["test/rails_root/db/**/*"].each do |each| 
+    FileUtils.rm_rf(each)
   end
+  FileUtils.rm_rf("test/rails_root/vendor/plugins/clearance")
+  system "mkdir -p test/rails_root/vendor/plugins/clearance"
+  system "cp -R generators test/rails_root/vendor/plugins/clearance"  
 end
 
-desc "Run the test suite"
-task :default => ['test:all', 'test:features']
+desc "Run the generator on the tests"
+task :generate do
+  generators.each do |generator|
+    system "cd test/rails_root && ./script/generate #{generator}"
+  end
+end
 
 gem_spec = Gem::Specification.new do |gem_spec|
   gem_spec.name        = "clearance"

@@ -52,23 +52,33 @@ class ClearanceGenerator < Rails::Generator::Base
         m.file file, file
       end
       
-      m.directory File.join("test", "functional")
-      ["test/functional/confirmations_controller_test.rb",
-       "test/functional/passwords_controller_test.rb",
-       "test/functional/sessions_controller_test.rb",
-       "test/functional/users_controller_test.rb"].each do |file|
-        m.file file, file
+      if testing?
+        m.directory File.join("test", "functional")
+        ["test/functional/confirmations_controller_test.rb",
+         "test/functional/passwords_controller_test.rb",
+         "test/functional/sessions_controller_test.rb",
+         "test/functional/users_controller_test.rb"].each do |file|
+          m.file file, file
+        end
+        
+        m.directory File.join("test", "unit")
+        ["test/unit/clearance_mailer_test.rb",
+         "test/unit/user_test.rb"].each do |file|
+          m.file file, file
+        end
+        
+        m.directory File.join("test", "factories")
+        ["test/factories/clearance.rb"].each do |file|
+          m.file file, file
+        end
       end
-      
-      m.directory File.join("test", "unit")
-      ["test/unit/clearance_mailer_test.rb",
-       "test/unit/user_test.rb"].each do |file|
-        m.file file, file
-      end
-      
-      m.directory File.join("test", "factories")
-      ["test/factories/clearance.rb"].each do |file|
-        m.file file, file
+
+      if specing?
+        m.directory File.join("spec", "models")
+        ["spec/models/clearance_mailer_spec.rb",
+         "spec/models/user_spec.rb"].each do |file|
+          m.file file, file
+        end
       end
       
       m.route_resources ':passwords'      
@@ -86,5 +96,21 @@ class ClearanceGenerator < Rails::Generator::Base
       m.readme "README"
     end
   end
+
+  protected
+
+  def testing?
+    !specing?
+  end
+
+  def specing?
+    options[:rspec]
+  end
   
+  def add_options!(opt)
+    opt.separator ''
+    opt.separator 'Options:'
+    opt.on("--rspec",
+           "Generate specs instead of tests") { options[:rspec] = true }
+  end
 end

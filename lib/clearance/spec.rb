@@ -1,0 +1,7 @@
+# require 'clearance/spec/controllers/confirmations_controller_spec'
+# require 'clearance/spec/controllers/passwords_controller_spec'
+# require 'clearance/spec/controllers/sessions_controller_spec'
+# require 'clearance/spec/controllers/users_controller_spec'
+# require 'clearance/spec/spec_helper'
+require 'clearance/spec/models/clearance_mailer_spec'
+require 'clearance/spec/models/user_spec'

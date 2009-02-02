@@ -5,10 +5,9 @@ require 'clearance/app/controllers/sessions_controller'
 require 'clearance/app/controllers/users_controller'
 require 'clearance/app/models/clearance_mailer'
 require 'clearance/app/models/user'
-require 'clearance/test/functional/confirmations_controller_test'
-require 'clearance/test/functional/passwords_controller_test'
-require 'clearance/test/functional/sessions_controller_test'
-require 'clearance/test/functional/users_controller_test'
-require 'clearance/test/test_helper'
-require 'clearance/test/unit/clearance_mailer_test'
-require 'clearance/test/unit/user_test'
+
+if defined? Spec
+  require 'clearance/spec'
+else
+  require 'clearance/test'
+end

@@ -5,19 +5,27 @@ require 'active_record'
  
 test_files_pattern = 'test/rails_root/test/{unit,functional}/**/*_test.rb'
 
-Rake::TestTask.new(:test => ['cleanup', 'generate', 'migrate']) do |task|
+task :prepare => ['cleanup', 'generate', 'migrate']
+
+Rake::TestTask.new(:test => :prepare) do |task|
   task.libs << 'lib'
   task.pattern = test_files_pattern
   task.verbose = false
 end
 
-Cucumber::Rake::Task.new(:features => ['cleanup', 'generate', 'migrate']) do |t|
+Cucumber::Rake::Task.new(:features => :prepare) do |t|
   t.cucumber_opts = "--format pretty"
   t.feature_pattern = 'test/rails_root/features/*.feature'
 end  
 
+desc "Run the spec suite"
+task :spec => :prepare do
+  system "cd test/rails_root && rake spec"
+end
+
 desc "Run the test suite and features"
-task :default => ['test', 'features']
+task :default => ['test', 'features', 'spec']
+
 
 desc "Run the migrations inside the Rails root"
 task :migrate do
@@ -48,6 +56,7 @@ task :generate do
   generators.each do |generator|
     system "cd test/rails_root && ./script/generate #{generator}"
   end
+  system "cd test/rails_root && ./script/generate clearance --rspec"
 end
 
 gem_spec = Gem::Specification.new do |gem_spec|

@@ -1,7 +1,7 @@
 --- !ruby/object:Gem::Specification 
 name: clearance
 version: !ruby/object:Gem::Version 
-  version: 0.5.3
+  version: 0.5.4
 platform: ruby
 authors: 
 - thoughtbot, inc.
@@ -23,7 +23,7 @@ autorequire:
 bindir: bin
 cert_chain: []
 
-date: 2009-03-05 00:00:00 -05:00
+date: 2009-03-12 00:00:00 -07:00
 default_executable: 
 dependencies: []
 
@@ -37,7 +37,6 @@ extra_rdoc_files: []
 
 files: 
 - CHANGELOG.textile
-- KNOWN_ISSUES.textile
 - LICENSE
 - Rakefile
 - README.textile
